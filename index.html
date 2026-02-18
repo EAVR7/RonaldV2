@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Party 19 | UNLOCKED</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Montserrat:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        :root {
+            --gold: #c5a059;
+            --gold-light: #ffd700;
+            --gold-glow: rgba(197, 160, 89, 0.5);
+            --dark: #050505;
+            --glass: rgba(0, 0, 0, 0.85);
+        }
+
+        body, html { 
+            background-color: var(--dark); 
+            color: white; 
+            font-family: 'Montserrat', sans-serif; 
+            height: 100%; 
+            width: 100%; 
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        @media (hover: hover) {
+            body { cursor: none; }
+        }
+
+        /* ========== VIDEO DE FONDO ========== */
+        #video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            background-color: var(--dark);
+            overflow: hidden;
+        }
+
+        #video-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            /* Fondo más visible y vibrante */
+            filter: brightness(0.55) contrast(1.4) saturate(0.9) grayscale(10%);
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out;
+        }
+
+        #video-bg.loaded {
+            opacity: 1;
+        }
+
+        .overlay-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Gradiente suavizado para que el video se vea mejor */
+            background: radial-gradient(ellipse at center, 
+                rgba(0,0,0,0.2) 0%, 
+                rgba(0,0,0,0.5) 50%, 
+                rgba(5,5,5,0.85) 90%,
+                rgba(5,5,5,0.95) 100%
+            );
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* ========== PARTÍCULAS ========== */
+        #dust-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ========== CURSOR PERSONALIZADO ========== */
+        #cursor {
+            position: fixed;
+            width: 35px;
+            height: 35px;
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease-out, opacity 0.3s;
+            mix-blend-mode: screen;
+            opacity: 0;
+        }
+
+        #cursor.click {
+            width: 50px;
+            height: 50px;
+            border-color: var(--gold-light);
+        }
+
+        #cursor-glow {
+            position: fixed;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, var(--gold-glow) 0%, rgba(197, 160, 89, 0.1) 40%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+            mix-blend-mode: screen;
+        }
+
+        @media (hover: hover) {
+            #cursor, #cursor-glow { opacity: 1; }
+        }
+
+        /* ========== PANTALLA DE CARGA ÉPICA ========== */
+        #loader {
+            position: fixed;
+            inset: 0;
+            /* Gradiente oscuro dinámico con destellos dorados */
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(197, 160, 89, 0.08) 0%, transparent 30%),
+                radial-gradient(circle at 80% 30%, rgba(255, 215, 0, 0.06) 0%, transparent 25%),
+                linear-gradient(135deg, #000000 0%, #0d0d0d 25%, #1a1a1a 50%, #0d0d0d 75%, #000000 100%);
+            background-size: 200% 200%;
+            animation: gradient-shift 8s ease infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            overflow: hidden;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Partículas doradas flotantes en el loader */
+        #loader::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(197, 160, 89, 0.3), transparent),
+                radial-gradient(2px 2px at 60% 70%, rgba(255, 215, 0, 0.3), transparent),
+                radial-gradient(1px 1px at 50% 50%, rgba(197, 160, 89, 0.2), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(255, 215, 0, 0.2), transparent),
+                radial-gradient(2px 2px at 90% 60%, rgba(197, 160, 89, 0.25), transparent),
+                radial-gradient(1px 1px at 33% 80%, rgba(255, 215, 0, 0.3), transparent);
+            background-size: 200% 200%;
+            animation: particles-float 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes particles-float {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                opacity: 0.6;
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        #loader-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.1rem, 4.5vw, 1.7rem); /* Título más grande y épico */
+            letter-spacing: 14px; /* Espaciado más amplio */
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            text-shadow: 
+                0 0 30px var(--gold-glow), 
+                0 0 60px var(--gold-glow),
+                0 0 90px rgba(197, 160, 89, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.8); /* Sombra profunda */
+            animation: epic-pulse-glow 3s infinite;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes epic-pulse-glow {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+                text-shadow: 
+                    0 0 25px var(--gold-glow), 
+                    0 0 50px var(--gold-glow),
+                    0 0 75px rgba(197, 160, 89, 0.2),
+                    0 5px 15px rgba(0, 0, 0, 0.8);
+            }
+            50% { 
+                opacity: 0.9; 
+                transform: scale(1.03);
+                text-shadow: 
+                    0 0 40px var(--gold-glow), 
+                    0 0 80px var(--gold-glow),
+                    0 0 120px rgba(255, 215, 0, 0.3),
+                    0 8px 20px rgba(0, 0, 0, 0.9);
+            }
+        }
+
+        .progress-wrapper {
+            width: 350px; /* Barra más ancha */
+            height: 4px; /* Más gruesa */
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 20px rgba(197, 160, 89, 0.2); /* Resplandor exterior */
+            position: relative;
+            z-index: 1;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                var(--gold), 
+                var(--gold-light), 
+                #d4af6a, 
+                var(--gold-light), 
+                var(--gold)
+            );
+            background-size: 300% 100%;
+            transition: width 3.5s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 
+                0 0 25px var(--gold-glow),
+                0 0 40px rgba(197, 160, 89, 0.4); /* Resplandor más intenso */
+            animation: shimmer-gold 3s infinite linear;
+        }
+
+        @keyframes shimmer-gold {
+            0% { background-position: -300% 0; }
+            100% { background-position: 300% 0; }
+        }
+
+        #progress-text {
+            margin-top: 20px;
+            font-size: 0.8rem; /* Ligeramente más grande */
+            letter-spacing: 6px;
+            color: rgba(255, 255, 255, 0.7); /* Más visible */
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+        }
+
+        #entrar-btn {
+            display: none;
+            margin-top: 50px; /* Más espacio */
+            padding: 22px 65px; /* Botón más grande */
+            background: transparent;
+            border: 2.5px solid var(--gold); /* Borde más grueso */
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            letter-spacing: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 1rem; /* Texto más grande */
+            font-weight: 800;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            animation: epic-pulse-gold 2.5s infinite;
+            opacity: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        #entrar-btn.show {
+            opacity: 1;
+        }
+
+        @keyframes epic-pulse-gold {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 0 0 var(--gold-glow),
+                    0 0 30px rgba(197, 160, 89, 0.3);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 0 20px rgba(197, 160, 89, 0),
+                    0 0 50px rgba(197, 160, 89, 0.5);
+            }
+        }
+
+        #entrar-btn:hover {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--dark);
+            border-color: var(--gold-light);
+            box-shadow: 
+                0 0 50px var(--gold-glow),
+                0 0 80px rgba(255, 215, 0, 0.4),
+                0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: scale(1.12) translateY(-5px);
+            letter-spacing: 10px; /* Efecto de expansión */
+        }
+
+        /* ========== CONTENIDO PRINCIPAL ========== */
+        .hero {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px 80px;
+            width: 100%;
+            max-width: 650px;
+            position: relative;
+            z-index: 20;
+        }
+
+        /* ========== TIPOGRAFÍA ========== */
+        .subtitle {
+            font-size: 0.75rem;
+            letter-spacing: 14px;
+            margin-bottom: 10px;
+            opacity: 0.85;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .gold-shimmer {
+            background: linear-gradient(to right, 
+                #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c, #ffd700, #c5a059
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 300% auto;
+            animation: shine 5s linear infinite;
+            font-weight: 900;
+        }
+
+        @keyframes shine { 
+            0% { background-position: 0% center; }
+            100% { background-position: 300% center; }
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(3.5rem, 14vw, 7.5rem);
+            letter-spacing: 18px;
+            margin: 10px 0 15px;
+            font-weight: 900;
+            line-height: 1;
+            /* Resplandor dorado más pronunciado */
+            filter: 
+                drop-shadow(0 0 30px var(--gold-glow)) 
+                drop-shadow(0 0 60px var(--gold-glow))
+                drop-shadow(0 0 90px rgba(255, 215, 0, 0.3));
+        }
+
+        .date-display {
+            letter-spacing: 12px;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            margin: 5px 0 15px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+            /* Sutil resplandor blanco */
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .host-label {
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            font-weight: 400;
+            margin: 20px 0 5px;
+        }
+
+        .host-name {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            letter-spacing: 8px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            /* Resplandor dorado más intenso */
+            text-shadow: 
+                0 0 25px var(--gold-glow), 
+                0 0 40px rgba(197, 160, 89, 0.4),
+                0 4px 12px rgba(0, 0, 0, 0.8);
+        }
+
+        /* ========== VISUALIZADOR AUDIO MEJORADO ========== */
+        .visualizer {
+            display: flex;
+            gap: 6px; /* Espaciado ligeramente mayor */
+            height: 38px; /* Altura un poco mayor */
+            margin: 20px 0 30px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .audio-bar {
+            width: 5px;
+            background: linear-gradient(to top, var(--gold), var(--gold-light));
+            border-radius: 3px;
+            animation: sound 0.5s infinite alternate;
+            /* Resplandor más visible */
+            box-shadow: 
+                0 0 12px var(--gold-glow),
+                0 0 20px rgba(197, 160, 89, 0.3);
+        }
+
+        .audio-bar:nth-child(1) { height: 12px; animation-duration: 0.4s; }
+        .audio-bar:nth-child(2) { height: 22px; animation-duration: 0.5s; animation-delay: 0.1s; }
+        .audio-bar:nth-child(3) { height: 18px; animation-duration: 0.3s; animation-delay: 0.2s; }
+        .audio-bar:nth-child(4) { height: 28px; animation-duration: 0.6s; }
+        .audio-bar:nth-child(5) { height: 15px; animation-duration: 0.4s; animation-delay: 0.1s; }
+        .audio-bar:nth-child(6) { height: 20px; animation-duration: 0.5s; animation-delay: 0.3s; }
+        .audio-bar:nth-child(7) { height: 25px; animation-duration: 0.45s; animation-delay: 0.15s; }
+
+        @keyframes sound {
+            from { height: 6px; opacity: 0.6; }
+            to { height: 100%; opacity: 1; }
+        }
+
+        /* ========== CONTADOR ========== */
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 0 0 40px 0;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .countdown-box {
+            background: rgba(8, 8, 8, 0.92);
+            backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(197, 160, 89, 0.4);
+            padding: 20px 10px 16px;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        }
+
+        .countdown-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .countdown-box:hover::before {
+            opacity: 1;
+        }
+
+        .countdown-box:hover {
+            border-color: var(--gold-light);
+            box-shadow: 0 0 30px var(--gold-glow), 0 12px 30px rgba(0, 0, 0, 0.8);
+            transform: translateY(-8px) scale(1.05);
+        }
+
+        .num {
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            color: var(--gold);
+            font-family: 'Cinzel', serif;
+            display: block;
+            font-weight: 800;
+            line-height: 1;
+            text-shadow: 0 0 20px var(--gold-glow), 0 3px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .label {
+            font-size: 0.58rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.75;
+            margin-top: 10px;
+            display: block;
+            font-weight: 400;
+        }
+
+        /* ========== TARJETA DE UBICACIÓN - CORREGIDA ========== */
+        .glass-card {
+            /* Fondo casi sólido para máxima legibilidad sobre el video */
+            background: rgba(5, 5, 5, 0.97);
+            
+            /* Glassmorphism */
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            
+            /* Borde dorado prominente */
+            border: 2px solid #c5a059;
+            
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 10px;
+            
+            /* Sombra y glow fuertes para destacar sobre cualquier fondo */
+            box-shadow: 
+                0 0 0 1px rgba(197, 160, 89, 0.15),
+                0 0 50px rgba(197, 160, 89, 0.4),
+                0 20px 80px rgba(0, 0, 0, 0.98),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                inset 0 -1px 0 rgba(197, 160, 89, 0.1);
+            
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            
+            position: relative;
+            z-index: 50;
+            
+            overflow: hidden;
+            margin: 0 auto 30px;
+            
+            animation: border-pulse 4s infinite alternate;
+            
+            /* Garantizar visibilidad total */
+            display: block;
+            visibility: visible;
+            opacity: 1; /* La tarjeta siempre visible, GSAP la animará desde 0 */
+        }
+
+        @keyframes border-pulse { 
+            from { 
+                border-color: rgba(197, 160, 89, 0.8); 
+                box-shadow: 
+                    0 0 0 1px rgba(197, 160, 89, 0.1),
+                    0 0 35px rgba(197, 160, 89, 0.3), 
+                    0 15px 60px rgba(0, 0, 0, 0.98);
+            } 
+            to { 
+                border-color: #ffd700;
+                box-shadow: 
+                    0 0 0 1px rgba(255, 215, 0, 0.2),
+                    0 0 60px rgba(197, 160, 89, 0.6), 
+                    0 15px 60px rgba(0, 0, 0, 0.98),
+                    0 0 100px rgba(255, 215, 0, 0.2);
+            } 
+        }
+
+        /* Efecto brillo deslizante */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, 
+                transparent, 
+                rgba(255, 255, 255, 0.08), 
+                transparent
+            );
+            transform: skewX(-25deg);
+            animation: card-shine 7s infinite;
+            pointer-events: none;
+        }
+
+        /* Borde superior decorativo */
+        .glass-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+            pointer-events: none;
+        }
+
+        @keyframes card-shine { 
+            0% { left: -150%; } 
+            20% { left: 250%; } 
+            100% { left: 250%; } 
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 
+                0 0 0 1px rgba(255, 215, 0, 0.3),
+                0 0 70px rgba(197, 160, 89, 0.7),
+                0 25px 80px rgba(0, 0, 0, 0.99);
+        }
+
+        .location-tag {
+            color: var(--gold-light);
+            letter-spacing: 5px;
+            font-size: 0.7rem;
+            margin-bottom: 18px;
+            font-weight: 700;
+            text-shadow: 0 0 15px var(--gold-glow);
+            text-transform: uppercase;
+        }
+
+        .location-title {
+            font-family: 'Cinzel', serif;
+            font-weight: 900; /* Más grueso para título principal */
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            margin: 0 0 20px 0;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            text-shadow: 
+                0 0 30px var(--gold-glow), 
+                0 0 50px rgba(255, 215, 0, 0.4),
+                0 5px 20px rgba(0,0,0,0.9);
+            line-height: 1.3;
+        }
+
+        /* Descripción del Party */
+        .party-description {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 0 20px 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .location-details {
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            line-height: 2;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin: 15px 0;
+        }
+
+        /* Referencia Casa Azul */
+        .location-reference {
+            display: block;
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            margin: 8px 0;
+            text-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        .location-time {
+            color: var(--gold-light);
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 4px;
+            text-shadow: 
+                0 0 25px var(--gold-glow),
+                0 0 40px rgba(255, 215, 0, 0.3);
+            display: block;
+            margin-top: 12px;
+        }
+
+        .divider {
+            height: 1px;
+            width: 80px;
+            background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+            margin: 28px auto;
+            opacity: 0.9;
+            box-shadow: 0 0 12px var(--gold-glow);
+        }
+
+        .location-note {
+            font-size: 0.72rem;
+            letter-spacing: 2.5px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            padding: 16px 24px;
+            border: 1.5px solid rgba(197, 160, 89, 0.6);
+            border-radius: 5px;
+            display: inline-block;
+            color: rgba(255, 255, 255, 0.95);
+            background: rgba(197, 160, 89, 0.08);
+            font-weight: 500;
+        }
+
+        .footer-text {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.3rem, 4vw, 1.9rem); /* Más grande */
+            margin: 55px 0 45px;
+            letter-spacing: 14px;
+            color: var(--gold);
+            font-weight: 800; /* Más grueso */
+            /* Resplandor dorado épico */
+            text-shadow: 
+                0 0 30px var(--gold-glow),
+                0 0 50px rgba(197, 160, 89, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.6);
+            text-transform: uppercase;
+            opacity: 0.95;
+        }
+
+        /* ========== RESPONSIVE OPTIMIZADO ========== */
+        
+        /* Tablets y pantallas medianas */
+        @media (max-width: 768px) {
+            .content-wrapper { 
+                padding: 35px 18px 55px;
+            }
+            h1 { 
+                letter-spacing: 10px;
+                font-size: clamp(3rem, 12vw, 6rem); 
+            }
+            .countdown { 
+                gap: 10px;
+                max-width: 100%;
+            }
+            .countdown-box { 
+                padding: 14px 8px 12px; 
+            }
+            .glass-card { 
+                padding: 32px 24px;
+                max-width: 100%; 
+            }
+            .party-description {
+                font-size: 0.9rem;
+                line-height: 1.7;
+            }
+            .location-title {
+                font-size: clamp(1.3rem, 5vw, 1.9rem);
+                letter-spacing: 4px;
+            }
+            body { 
+                cursor: default; 
+            }
+            #cursor, #cursor-glow { 
+                display: none; 
+            }
+        }
+
+        /* Móviles */
+        @media (max-width: 480px) {
+            .content-wrapper {
+                padding: 25px 15px 45px;
+            }
+            .subtitle { 
+                letter-spacing: 8px; 
+                font-size: 0.65rem;
+                margin-bottom: 8px; 
+            }
+            h1 { 
+                letter-spacing: 8px;
+                margin: 6px 0 8px;
+                font-size: clamp(2.8rem, 12vw, 5rem); 
+            }
+            .date-display {
+                font-size: 0.85rem;
+                letter-spacing: 8px;
+            }
+            .host-label {
+                font-size: 0.5rem;
+                letter-spacing: 3px;
+            }
+            .host-name {
+                font-size: clamp(1rem, 5vw, 1.3rem);
+                letter-spacing: 5px;
+                margin: 12px 0 10px;
+            }
+            .visualizer {
+                height: 30px;
+                gap: 4px;
+                margin: 15px 0 20px;
+            }
+            .countdown { 
+                gap: 8px;
+                margin-bottom: 25px; 
+            }
+            .countdown-box {
+                padding: 12px 6px 10px;
+            }
+            .num { 
+                font-size: clamp(1.5rem, 7vw, 2rem); 
+            }
+            .label { 
+                font-size: 0.48rem; 
+                letter-spacing: 1.5px;
+                margin-top: 8px;
+            }
+            .glass-card { 
+                padding: 28px 20px;
+                border-width: 1.5px;
+            }
+            .location-title {
+                font-size: clamp(1.1rem, 5.5vw, 1.6rem);
+                letter-spacing: 3px;
+                margin-bottom: 15px;
+                line-height: 1.4;
+            }
+            .party-description {
+                font-size: 0.82rem;
+                line-height: 1.6;
+                margin-bottom: 15px;
+            }
+            .location-details {
+                font-size: 0.85rem;
+                line-height: 1.9;
+            }
+            .location-reference {
+                font-size: 0.95rem;
+                letter-spacing: 2px;
+            }
+            .location-time {
+                font-size: 1.15rem;
+                letter-spacing: 3px;
+            }
+            .location-note {
+                font-size: 0.62rem;
+                letter-spacing: 2px;
+                padding: 12px 18px;
+            }
+            .divider {
+                width: 60px;
+                margin: 20px auto;
+            }
+            .footer-text {
+                font-size: clamp(1.1rem, 4vw, 1.5rem);
+                letter-spacing: 10px;
+                margin: 35px 0 30px;
+            }
+        }
+
+        /* Pantallas pequeñas en horizontal */
+        @media (max-height: 700px) and (orientation: landscape) {
+            .content-wrapper {
+                padding: 20px 15px 40px;
+                min-height: auto;
+            }
+            h1 { 
+                margin: 4px 0 6px; 
+                font-size: clamp(2.2rem, 9vw, 4rem); 
+            }
+            .host-name {
+                margin: 8px 0 6px;
+                font-size: clamp(0.9rem, 3.5vw, 1.2rem);
+            }
+            .countdown { 
+                margin: 12px 0 18px; 
+                gap: 6px; 
+            }
+            .countdown-box { 
+                padding: 10px 5px 8px; 
+            }
+            .glass-card { 
+                padding: 24px 18px;
+                margin-bottom: 18px; 
+            }
+            .visualizer {
+                margin: 10px 0 15px;
+                height: 25px;
+            }
+            .party-description {
+                font-size: 0.8rem;
+                line-height: 1.5;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- VIDEO DE FONDO -->
+    <div id="video-container">
+        <video id="video-bg" muted loop playsinline preload="auto">
+            <source src="fondos/Fondo1.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="overlay-gradient"></div>
+
+    <!-- PARTÍCULAS -->
+    <canvas id="dust-canvas"></canvas>
+
+    <!-- CURSOR PERSONALIZADO -->
+    <div id="cursor"></div>
+    <div id="cursor-glow"></div>
+
+    <!-- PANTALLA DE CARGA -->
+    <div id="loader">
+        <div id="loader-title">LOADING LEVEL 19</div>
+        <div class="progress-wrapper">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="progress-text">0%</div>
+        <button id="entrar-btn">ENTRAR A LA FIESTA</button>
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="track" loop preload="auto">
+        <source src="music/musica.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="hero">
+        <div class="content-wrapper">
+            <p class="subtitle">UNLOCKING</p>
+            <h1 class="gold-shimmer">LEVEL 19</h1>
+            <p class="date-display">21 . 02 . 26</p>
+            
+            <p class="host-label">Hosted by</p>
+            <h2 class="host-name">RONALD</h2>
+
+            <!-- VISUALIZADOR DE AUDIO -->
+            <div class="visualizer">
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+                <div class="audio-bar"></div>
+            </div>
+
+            <!-- CONTADOR -->
+            <div class="countdown">
+                <div class="countdown-box">
+                    <span class="num" id="d">00</span>
+                    <span class="label">Días</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="num" id="h">00</span>
+                    <span class="label">Horas</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="num" id="m">00</span>
+                    <span class="label">Minutos</span>
+                </div>
+                <div class="countdown-box">
+                    <span class="num" id="s">00</span>
+                    <span class="label">Segundos</span>
+                </div>
+            </div>
+
+            <!-- TARJETA DE UBICACIÓN -->
+            <div class="glass-card">
+                <h2 class="location-title">TE INVITO A MIS 19 AÑOS</h2>
+                
+                <!-- Descripción del Party -->
+                <p class="party-description">
+                    ¡Se arma party por mi cumple! Prepárate para el desmadre y vamos a celebrar a lo grande.
+                </p>
+                
+                <div class="divider"></div>
+                
+                <!-- Dirección y Hora -->
+                <p class="location-details">
+                    APIPA SECTOR 6 INDUSTRIAL<br>
+                    <span class="location-reference">CASA AZUL</span><br>
+                    <span class="location-time">8:00 PM</span>
+                </p>
+                
+                <div class="divider"></div>
+                
+                <!-- Notas importantes -->
+                <p class="location-note">1 TRAGO POR 2 PERSONAS O REGALO</p>
+            </div>
+
+            <p class="footer-text">TE ESPERO</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        const audio = document.getElementById('track');
+        const video = document.getElementById('video-bg');
+        const loader = document.getElementById('loader');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const entrarBtn = document.getElementById('entrar-btn');
+        const heroSection = document.querySelector('.hero');
+        const loaderTitle = document.getElementById('loader-title');
+
+        // ========== CURSOR PERSONALIZADO ==========
+        const cursor = document.getElementById('cursor');
+        const cursorGlow = document.getElementById('cursor-glow');
+        
+        if (window.matchMedia('(hover: hover)').matches) {
+            let mouseX = 0, mouseY = 0;
+            let cursorX = 0, cursorY = 0;
+            let glowX = 0, glowY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            document.addEventListener('mousedown', () => cursor.classList.add('click'));
+            document.addEventListener('mouseup', () => cursor.classList.remove('click'));
+
+            function updateCursor() {
+                const dx = mouseX - cursorX;
+                const dy = mouseY - cursorY;
+                cursorX += dx * 0.2;
+                cursorY += dy * 0.2;
+
+                const dxGlow = mouseX - glowX;
+                const dyGlow = mouseY - glowY;
+                glowX += dxGlow * 0.15;
+                glowY += dyGlow * 0.15;
+
+                cursor.style.transform = `translate(${cursorX - 17.5}px, ${cursorY - 17.5}px)`;
+                cursorGlow.style.transform = `translate(${glowX - 90}px, ${glowY - 90}px)`;
+
+                requestAnimationFrame(updateCursor);
+            }
+            updateCursor();
+        }
+
+        // ========== SISTEMA DE PARTÍCULAS ==========
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class GoldParticle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * canvas.height;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -10;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.6;
+                this.speedY = Math.random() * 0.4 + 0.2;
+                this.opacity = Math.random() * 0.4 + 0.1;
+                this.life = 0;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life += 0.005;
+                this.x += Math.sin(this.life * 2) * 0.3;
+
+                if (this.y > canvas.height || this.x < -10 || this.x > canvas.width + 10) {
+                    this.reset();
+                }
+
+                if (this.life > 8) {
+                    this.opacity -= 0.01;
+                    if (this.opacity <= 0) this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = '#c5a059';
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#c5a059';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const particleCount = window.innerWidth < 768 ? 35 : 70;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new GoldParticle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        // ========== CARGA PROGRESIVA ==========
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 100) {
+                progress += Math.random() * 12;
+                if (progress > 100) progress = 100;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.floor(progress) + '%';
+            } else {
+                clearInterval(progressInterval);
+                setTimeout(() => {
+                    loaderTitle.textContent = 'ACCESS GRANTED';
+                    loaderTitle.style.color = 'white';
+                    progressText.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        entrarBtn.style.display = 'block';
+                        setTimeout(() => entrarBtn.classList.add('show'), 100);
+                    }, 300);
+                }, 500);
+            }
+        }, 100);
+
+        video.addEventListener('loadeddata', () => video.classList.add('loaded'));
+        video.load();
+
+        // ========== ACTIVACIÓN CON GSAP Y CONFETI ==========
+        entrarBtn.addEventListener('click', () => {
+            audio.play().catch(e => console.log('Audio:', e));
+            video.play().catch(e => {
+                console.log('Video:', e);
+                video.muted = true;
+                video.play();
+            });
+
+            // Ocultar loader con fade
+            gsap.to(loader, {
+                opacity: 0,
+                duration: 0.8,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    loader.style.display = 'none';
+                }
+            });
+
+            // Mostrar hero
+            gsap.to(heroSection, {
+                opacity: 1,
+                duration: 0.6,
+                ease: "power2.out"
+            });
+
+            // ========== ANIMACIONES CORREGIDAS SIN CONFLICTOS ==========
+            const tl = gsap.timeline();
+
+            // GRUPO 1: Textos superiores
+            tl.from(['.subtitle', '.date-display', '.host-label'], {
+                opacity: 0,
+                y: -20,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power2.out",
+                clearProps: "all"
+            })
+            
+            // GRUPO 2: Título principal con escala
+            .fromTo('h1', 
+                { scale: 1.3, opacity: 0 },
+                { 
+                    scale: 1, 
+                    opacity: 1, 
+                    duration: 1.5,
+                    ease: "power4.out",
+                    clearProps: "all"
+                }, 
+                "-=0.6"
+            )
+            
+            // GRUPO 3: Nombre del host
+            .from('.host-name', {
+                y: -25,
+                opacity: 0,
+                duration: 0.7,
+                ease: "back.out(1.7)",
+                clearProps: "all"
+            }, "-=0.8")
+            
+            // GRUPO 4: Visualizador de audio
+            .from('.visualizer .audio-bar', {
+                height: 0,
+                stagger: 0.06,
+                duration: 0.6,
+                ease: "back.out(1.7)",
+                clearProps: "all"
+            }, "-=0.5")
+            
+            // GRUPO 5: Contador con rebote
+            .from('.countdown .countdown-box', {
+                y: 50,
+                opacity: 0,
+                stagger: 0.1,
+                duration: 0.9,
+                ease: "back.out(1.7)",
+                clearProps: "all"
+            }, "-=0.4")
+            
+            // GRUPO 6: Tarjeta de ubicación (CRUCIAL - sin conflictos)
+            .fromTo('.glass-card', 
+                { y: 80, opacity: 0, scale: 0.92 },
+                { 
+                    y: 0, 
+                    opacity: 1, 
+                    scale: 1, 
+                    duration: 1.2, 
+                    ease: "power3.out",
+                    clearProps: "all",
+                    onComplete: () => {
+                        // Garantizar visibilidad absoluta tras animación
+                        const card = document.querySelector('.glass-card');
+                        card.style.opacity = '1';
+                        card.style.visibility = 'visible';
+                        card.style.transform = 'none';
+                    }
+                }
+            , "-=0.5")
+            
+            // GRUPO 7: Footer final
+            .from('.footer-text', {
+                opacity: 0,
+                y: 25,
+                duration: 0.8,
+                ease: "power2.out",
+                clearProps: "all"
+            }, "-=0.6");
+
+            lanzarConfeti();
+        });
+
+        // ========== SISTEMA DE CONFETI ==========
+        function lanzarConfeti() {
+            const duration = 4 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = {
+                startVelocity: 30,
+                spread: 360,
+                ticks: 80,
+                zIndex: 5,
+                gravity: 0.8,
+                decay: 0.94,
+                scalar: 1.2
+            };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            confetti({
+                particleCount: 200,
+                spread: 140,
+                origin: { y: 0.5 },
+                colors: ['#c5a059', '#ffd700', '#ffffff', '#d4af6a'],
+                zIndex: 5,
+                scalar: 1.8,
+                gravity: 0.6
+            });
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 70 * (timeLeft / duration);
+
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.4), y: Math.random() - 0.2 },
+                    colors: ['#c5a059', '#ffd700', '#ffffff', '#d4af6a']
+                }));
+
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.6, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#c5a059', '#ffd700', '#ffffff', '#d4af6a']
+                }));
+            }, 250);
+        }
+
+        // ========== CONTADOR REGRESIVO ==========
+        const targetDate = new Date("February 21, 2026 20:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('d').textContent = String(days).padStart(2, '0');
+                document.getElementById('h').textContent = String(hours).padStart(2, '0');
+                document.getElementById('m').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('s').textContent = String(seconds).padStart(2, '0');
+            } else {
+                document.getElementById('d').textContent = '00';
+                document.getElementById('h').textContent = '00';
+                document.getElementById('m').textContent = '00';
+                document.getElementById('s').textContent = '00';
+            }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        document.addEventListener('click', () => {
+            if (video.paused) {
+                video.play().catch(e => console.log('Video:', e));
+            }
+        }, { once: true });
+
+        setTimeout(() => {
+            if (!video.classList.contains('loaded')) {
+                video.classList.add('loaded');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
